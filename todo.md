@@ -8,7 +8,7 @@ Todo List
 	Write function that takes in message and public key, then returns encrypted hash
 	Assigned to: Jacob
 
-+	Look into client-side javascript IMAP client (this one\'s tricky, try http://www.hiddentao.com/archives/2013/08/15/javascript-imap-email-client-for-browsers/)
++	Look into client-side javascript IMAP client (this one's tricky, try http://www.hiddentao.com/archives/2013/08/15/javascript-imap-email-client-for-browsers/)
 	Get some something simple running
 	Assigned to: Kirby
 
