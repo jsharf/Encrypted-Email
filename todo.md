@@ -16,5 +16,4 @@ Todo List
 	Do something better than the current Hello, World! page. Use divshot!  
 	Assigned to: ? (not sure)  
 
-
 "Look into" means investigate possible solutions, and maybe come up with some basic preliminary code

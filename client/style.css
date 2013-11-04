@@ -1,0 +1,22 @@
+/* Make something awesome! */
+
+.row
+{
+  margin: 10px;
+}
+
+.email-row div p
+{
+  width: 100%;
+  
+}
+
+.email-row
+{
+  overflow: hidden;
+}
+
+.subjectline
+{
+
+}
