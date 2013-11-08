@@ -12,8 +12,8 @@ Todo List
 	Get some something simple running  
 	Assigned to: Kirby
 
-+	HTML/CSS front-end design  
-	Do something better than the current Hello, World! page. Use divshot!  
-	Assigned to: ? (not sure)  
++	HTML/CSS front-end design 
+	Done! (just need to integrate with back-end)
+	Assigned to: Kirby and Jacob
 
 "Look into" means investigate possible solutions, and maybe come up with some basic preliminary code
