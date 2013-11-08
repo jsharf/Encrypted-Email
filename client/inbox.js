@@ -20,12 +20,12 @@ $( document ).ready(function() {
     }
 
     function emailToRow(email) {
-        $("<tr id=\"e"+email.id+"\"><td>"+email.from+"</td><td>"+email.subject+"</td><td>"+email.date+"</td></tr>", {
+	    emails.push(email);
+        $("<tr id=\"e"+email.id+"\"><td>"+email.from+"</td><td>"+email.subject+"</td><td>"+email.date+"</td></tr>"/*, {
             click: function() {
-                display(this);
+                display(email.id);
             }
-        }).click().appendTo("#emails");
-
+        }*/).click(function d() {display(email.id);}).appendTo("#emails");
     }
 
     function decrypt(email) {
@@ -62,7 +62,6 @@ $( document ).ready(function() {
                     email.msg = email.msg.substring(4,email.msg.length);
                     decrypt(email);
                 }
-                emails.push(email);
                 emailToRow(email);
             }
 		}
@@ -74,6 +73,9 @@ $( document ).ready(function() {
     // This is an asynchronous call, and upon completion calls 
     // loadEmails with the retrieved json data
     $.getJSON(URL, request, loadEmails);
+	emailToRow(new Email("Carlsen", "Anand", "Chess", "Nov 10th", "I will defeat you!!", 0));
+	emailToRow(new Email("Carlsen", "Anand", "Chessing", "Nov 11th", "I am defeating you!!", 1));
+	emailToRow(new Email("Carlsen", "Anand", "Chessed", "Nov 12th", "I defeated you!!", 2));
     
 
 });
