@@ -1,0 +1,32 @@
+{
+    "manifest_version": 2,
+    "name": "My extension",
+    "version": "0.1",
+
+    "default_locale": "en",
+    "description": "Automates the process of sending encrypted emails in gmail",
+    "icons": {},
+
+    "page_action": {
+        "default_icon": {                    // optional
+            "19": "images/icon19.png",           // optional
+            "38": "images/icon38.png"            // optional
+        },
+        "default_title": "Google Mail",      // optional; shown in tooltip
+        "default_popup": "popup.html"        // optional
+    },
+
+    "content_scripts": [
+        {
+            "matches": ["http://www.google.com/*"],
+            "css": ["mystyles.css"],
+            "js": ["jquery.js", "myscript.js"]
+        }
+    ],
+
+    // pages we can make XHR requests to
+    // http://developer.chrome.com/extensions/xhr.html
+    "permissions": [
+        "http://www.google.com/"
+    ],
+}
