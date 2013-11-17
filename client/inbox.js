@@ -7,10 +7,10 @@ $( document ).ready(function() {
     // HTTP GET request made by getJSON
     var request = {
         key: "value"
-    }
+    };
     var emails = new Array();
 
-    function Email(var from, var to, var subject, var date, var msg, var id) {
+    function Email(from, to, subject, date, msg, id) {
         this.from = from;
         this.to = to;
         this.subject = subject;
@@ -19,16 +19,16 @@ $( document ).ready(function() {
         this.id = id;
     }
 
-    function emailToRow(var email) {
-        var $("<tr id=\"e"+email.id+"\"><td>"+email.from+"</td><td>"+email.subject+"</td><td>"+email.date+"</td></tr>", {
+    function emailToRow(email) {
+	    emails.push(email);
+        $("<tr id=\"e"+email.id+"\"><td>"+email.from+"</td><td>"+email.subject+"</td><td>"+email.date+"</td></tr>"/*, {
             click: function() {
-                display(this);
+                display(email.id);
             }
-        }).appendTo("#emails");
-
+        }*/).click(function d() {display(email.id);}).appendTo("#emails");
     }
 
-    function decrypt(var email) {
+    function decrypt(email) {
         var msg = email.msg;
         var decypted = '';
         //TODO: fill this in please
@@ -37,7 +37,7 @@ $( document ).ready(function() {
         email.msg = decrypted;
     }
     // display as a dialog
-    function display(var id) {
+    function display(id) {
         function createDialog(title, text, options) {
                 return $("<div class='dialog' title='" + title + "'><p>" + text + "</p></div>")
                         .dialog(options);
@@ -46,7 +46,7 @@ $( document ).ready(function() {
                      "<hr>" + emails[id].msg);
     }
    
-    function loadEmails(var data) {
+    function loadEmails(data) {
         if( Object.prototype.toString.call( someVar ) === '[object Array]' ) {
             for (var i=0; i<data.length; i++) {
                 // I know I'm recreating objects passed by json. it's for the sake of enforcing
@@ -62,10 +62,10 @@ $( document ).ready(function() {
                     email.msg = email.msg.substring(4,email.msg.length);
                     decrypt(email);
                 }
-                emails.push(email);
                 emailToRow(email);
             }
-    }
+		}
+	}
     
     
     // create HTTP GET request with parameters specified in request.
@@ -73,6 +73,9 @@ $( document ).ready(function() {
     // This is an asynchronous call, and upon completion calls 
     // loadEmails with the retrieved json data
     $.getJSON(URL, request, loadEmails);
+	emailToRow(new Email("Carlsen", "Anand", "Chess", "Nov 10th", "I will defeat you!!", 0));
+	emailToRow(new Email("Carlsen", "Anand", "Chessing", "Nov 11th", "I am defeating you!!", 1));
+	emailToRow(new Email("Carlsen", "Anand", "Chessed", "Nov 12th", "I defeated you!!", 2));
     
 
 });
