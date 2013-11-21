@@ -1,17 +1,17 @@
 {
     "manifest_version": 2,
+
     "name": "My extension",
+    "description": "Automates the process of sending encrypted emails in gmail",
     "version": "0.1",
 
-    "default_locale": "en",
-    "description": "Automates the process of sending encrypted emails in gmail",
     "icons": {},
 
     "page_action": {
         "default_icon": {                    // optional
             "38": "logo.png"            // optional
         },
-        "default_title": "Encrypted Gmail",      // optional; shown in tooltip
+        "default_title": "Encrypted Gmail"      // optional; shown in tooltip
     },
 
     "content_scripts": [
@@ -26,6 +26,5 @@
     // http://developer.chrome.com/extensions/xhr.html
     "permissions": [
         "http://www.google.com/"
-        "htmlscraper.com"
-    ],
+    ]
 }
