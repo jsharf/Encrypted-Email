@@ -9,7 +9,8 @@ function addButtonHooks() {
         
         for (var i=0; i<sendDivs.length; i++) {
             sendButton = sendDivs[i];
-	    if (!sendButton.EncryptedEmailDummy) {
+	    // if the button isn't already a dummy button
+        if (!sendButton.EncryptedEmailDummy) {
 	        // Inject our js
                 
 		//clones the button. the dummy button has no listeners
@@ -25,6 +26,7 @@ function addButtonHooks() {
                     alert( "running super awesome encrypted email code" );
                     sendButton.click();
                 }
+            // mark the newly created button as a dummy button
 	        dummySendButton.EncryptedEmailDummy = true;
 	    }
         }
