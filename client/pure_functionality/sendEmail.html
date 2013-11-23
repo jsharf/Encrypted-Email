@@ -1,0 +1,64 @@
+<html>
+<head>
+	<title>Send Encrypted Emails</title>
+	<script src="/openpgpjs-master/resources/openpgp.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	
+	<script>
+	$(document).ready(function(){
+		$("#sendButton").click(function(){
+			//Fetch receiver's public key
+			//requestPublicKey
+			$.ajax({
+		  		type: "GET",
+		  		url: "request.php",
+		  		async: false,
+		  		data: { 'email': $("#toAddress").val()}
+			}).done(function(requestResponse){
+				console.log("Response from request.php received");
+				//Fetch sender's encrypted private key
+				var parsedRequestResponse = $.parseJSON(requestResponse);
+				console.log(parsedRequestResponse);
+				var receiverPublicKey =  parsedRequestResponse.publickey;
+				//Encrypt message
+				openpgp.init();
+				var pub_key = openpgp.read_publicKey(receiverPublicKey);
+				var encryptedMessage = openpgp.write_encrypted_message(pub_key, $('#message').val());
+				//Send message
+				console.log(encryptedMessage);
+				$.ajax({
+			  		type: "GET",
+			  		url: "server_sendEmail.php",
+			  		async: false,
+			  		data: { 'address': $("#toAddress").val(),
+			  				'subject': $("#subject").val(),
+			  				'message': $("#message").val(),
+			  				'from': $("#fromAddres").val()}
+				}).done(function(sendResponse){
+					if(sendResponse=="success")
+						alert("successful");
+					else
+						alert("failed");
+				});
+			});
+		});
+	});
+
+	</script>
+
+</head>
+
+<body>
+	To address:<br>
+	<input id="toAddress"><br>
+	
+	From address:<br>
+	<input id="fromAddres"><br>
+
+	Subject:<br>
+	<input id="subject"><br>
+
+	Your message:<br>
+	<textarea id="message" cols="80" rows="20"></textarea><br>
+	<button id='sendButton'>Send Message</button>
+</body>

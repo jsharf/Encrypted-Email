@@ -1,0 +1,124 @@
+<html>
+<head>
+	<title>View Encrypted Emails</title>
+	<script src="/openpgpjs-master/resources/openpgp.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+	<script>	
+	$(document).ready( function(){
+		function decryptEmail(message){
+			var priv_key = openpgp.read_privateKey($('#privateKeyInput').val());
+			var msg = openpgp.read_message(message);
+
+			var keymat = null;
+			var sesskey = null;
+			// Find the private (sub)key for the session key of the message
+			for (var i = 0; i< msg[0].sessionKeys.length; i++) {
+				if (priv_key[0].privateKeyPacket.publicKey.getKeyId() == msg[0].sessionKeys[i].keyId.bytes) {
+					keymat = { key: priv_key[0], keymaterial: priv_key[0].privateKeyPacket};
+					sesskey = msg[0].sessionKeys[i];
+					break;
+				}
+				for (var j = 0; j < priv_key[0].subKeys.length; j++) {
+					if (priv_key[0].subKeys[j].publicKey.getKeyId() == msg[0].sessionKeys[i].keyId.bytes) {
+						keymat = { key: priv_key[0], keymaterial: priv_key[0].subKeys[j]};
+						sesskey = msg[0].sessionKeys[i];
+						break;
+					}
+				}
+			}
+			if (keymat != null) {
+				if (!keymat.keymaterial.decryptSecretMPIs($('#decpassword').val())) {
+					console.log("password for secret key was incorrect");
+					return;
+
+				}
+				return msg[0].decrypt(keymat, sesskey);
+			}
+			else{
+				console.log("No private key found");
+			}	
+		}
+
+		//fetchEmails
+		$("#viewEmails").click(function(){
+			$.ajax({
+			  type: "GET",
+			  url: "fetchEmails.php",
+			   async: false,
+			  data: { 'username': $("#emailAddress").val(),
+			  		  'password': $("#emailPassword").val(),
+			  		  'hostname': 'blah'
+			  		   }
+			}).done(function( fetchEmailsResponse ) {
+				openpgp.init();
+				console.log("Response from fetchEmails.php received");
+				var b = $.parseJSON(fetchEmailsResponse);
+				console.log(b);
+				//requestPublicKey
+				$.ajax({
+			  		type: "GET",
+			  		url: "request.php",
+			  		async: false,
+			  		data: { 'email': $("#emailAddress").val()}
+				}).done(function(publicKeyResponse){
+					console.log("Response from request.php received");
+					var parsedPublicKeyResponse = $.parseJSON(publicKeyResponse);
+					console.log(parsedPublicKeyResponse);
+
+					$(privateKeyInput).text(parsedPublicKeyResponse.privatekey);
+					var rawOutput = '';
+					var decryptedOutput = '';
+
+					//TODO:
+					//Verify sender signature against sender's public key
+					for (var n=0; n<b.length; n++) {
+						rawOutput += 'Email #' + n + '<br>';
+						rawOutput += 'Date: ' + b[n].date + '<br>';
+						rawOutput += 'From: ' + b[n].from + '<br>';
+						rawOutput += 'Seen: ' + b[n].seen + '<br>';
+						rawOutput += 'Message Body: ' + b[n].body + '<br>';
+
+						decryptedOutput += 'Email #' + n + '<br>';
+						decryptedOutput += 'Date: ' + b[n].date + '<br>';
+						decryptedOutput += 'From: ' + b[n].from + '<br>';
+						decryptedOutput += 'Seen: ' + b[n].seen + '<br>';
+
+						if( (b[n].body).indexOf("BEGIN PGP MESSAGE") == -1 )
+							decryptedOutput += 'Message Body: ' + b[n].body + '<br>';
+						else
+							decryptedOutput += 'Message Body: ' + decryptEmail(b[n].body) + '<br>';
+					
+						$("#rawEmails").html(rawOutput);
+						$("#decryptedEmails").html(decryptedOutput);
+					}
+				});
+			});
+		});
+	});
+	</script>
+</head>
+
+<body>
+	<div>
+		Please enter your email login credentials:<br>
+		Email Address: <input type="text" id="emailAddress"><br>
+		Email Password: <input type="text" id="emailPassword"><br><br>
+
+		Password for Private Key: <input type="text" id="decpassword"><br>
+		Private Key:<br><textarea id="privateKeyInput" cols="80" rows="20"></textarea><br>
+
+		<button id='viewEmails'>View Emails</button>
+	</div>
+
+	<pre>
+		Raw Emails (not decrypted:<br>
+		<div id='rawEmails' style='width:800px; border:1px solid;'></div>
+		Decrypted Emails:<br>
+		<div id='decryptedEmails' style='width:800px; border:1px solid;'></div>
+		
+	</pre>
+
+
+</body>
+</html>
