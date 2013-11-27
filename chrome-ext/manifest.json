@@ -17,10 +17,13 @@
     "content_scripts": [
         {
             "matches": ["*://mail.google.com/*"],
-            "js": ["jquery.js", "gmail-injector.js"],
+            "js": ["lib/jquery.js", "lib/openpgp.min.js", "gmail-injector.js"],
             "run_at": "document_end"
         }
     ],
+
+    //avoids some annoying errors
+    "web_accessible_resources": ["lib/jquery-2.0.3.min.map"],
 
     // pages we can make XHR requests to
     // http://developer.chrome.com/extensions/xhr.html
