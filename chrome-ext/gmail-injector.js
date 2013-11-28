@@ -8,7 +8,9 @@ function addButtonHooks() {
     var sendButton;
     var sendDivs = $("div:contains('Send'):not(:has('div'))");
     if ( sendDivs.length <= 0 ) {
-      // TODO: some useful error
+      // don't alert anything -- it's perfectly okay if there are no send
+      // buttons on the gmail main page. When they appear, addButtonHooks (which
+      // is called every 100ms) will find them
       return;
     }
 
@@ -28,9 +30,12 @@ function addButtonHooks() {
         // Now we can add whatever we want to dummySendButton.onclick
         // and then call sendButton.click()
         // to perform the normal click procedure
-        dummySendButton.onclick = function () {
-            encryptEmail();
-            alert( "running super awesome encrypted email code" );
+        dummySendButton.onclick = function (e) {
+            // browser compatibility
+            e = e || window.event
+
+            encryptEmail(e);
+            console.log("Encrypting and sending...");
             sendButton.click();
         };
         // mark the newly created button as a dummy button
@@ -41,9 +46,9 @@ function addButtonHooks() {
 
 // Performs all of the encryption tasks before continuing the normal
 // Gmail send function.
-function encryptEmail() {
+function encryptEmail(e) {
 
-    //TODO: implement this
+    //TODO: implement this for multiple message divs on one page.
     var messageDiv = $("div[role='textbox'][aria-label='Message Body']");
     var message = messageDiv.html();
     console.log(message);   
@@ -65,8 +70,15 @@ function encryptEmail() {
       messageDiv.html(message);
     });
 
-    request.fail( function() {
+    request.fail( function(e) {
       //TODO: some useful error
+      alert("Warning: Due to some unexplained error your message could not be" +
+      "encrypted. Try refreshing the page");
+      // if already warned about lack of encryption, just return
+      if (this.previously_warned)
+          return;
+      e.preventDefault();
+      this.previously_warned = true;
       return;
     });     
 
