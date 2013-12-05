@@ -1,4 +1,4 @@
-var keyServerURL = "google.com"; //TODO: figure this out
+var keyServerURL = "localhost:80"; //TODO: figure this out
 
 
 function addButtonHooks() {
@@ -85,5 +85,80 @@ function encryptEmail(e) {
     return;
 }
 
+function decryptEmail() {
+
+  // find the message body
+  var messageDiv = $("div:contains('===pgp==='):not(:has('span')):not(:has('div'))");
+  var message = messageDiv.html();
+
+  // get email and private key password from user settings
+  var email = localStorage['email'];
+  var privateKeyPassword = localStorage['password'];
+
+  // get the private key
+  var request = $.ajax({
+      type: "GET",
+      url: keyServerURL,
+      data: { 'email': email }
+    });
+
+    request.done( function( data ) {
+      var parsedData = $.parseJSON(data);
+      var priv_key = parsedData.privatekey;
+
+      var msg = openpgp.read_message(message);
+
+			var keymat = null;
+			var sesskey = null;
+
+			// Find the private (sub)key for the session key of the message
+      // BEGIN MAGIC BEYOND THE SCOPE OF CS130
+			for (var i = 0; i< msg[0].sessionKeys.length; i++) {
+				if (priv_key[0].privateKeyPacket.publicKey.getKeyId() == msg[0].sessionKeys[i].keyId.bytes) {
+					keymat = { key: priv_key[0], keymaterial: priv_key[0].privateKeyPacket};
+					sesskey = msg[0].sessionKeys[i];
+					break;
+				}
+				for (var j = 0; j < priv_key[0].subKeys.length; j++) {
+					if (priv_key[0].subKeys[j].publicKey.getKeyId() == msg[0].sessionKeys[i].keyId.bytes) {
+						keymat = { key: priv_key[0], keymaterial: priv_key[0].subKeys[j]};
+						sesskey = msg[0].sessionKeys[i];
+						break;
+					}
+				}
+			}
+
+			if (keymat === null) {
+        console.log("uh oh wierd stuff happened getting the keymat");
+        return;
+      }
+				
+      if (!keymat.keymaterial.decryptSecretMPIs( privateKeyPassword )) {
+					console.log("password for secret key was incorrect");
+					return;
+      }
+      
+      var decryptedMessage = msg[0].decrypt(keymat, sesskey);
+
+      // set the message div with the decrypted message
+      messageDiv.html( decryptedMessage );
+
+    });
+
+    request.fail( function(e) {
+      //TODO: some useful error
+      alert("Warning: Due to some unexplained error your key could not be" +
+      "retrieved. Try refreshing the page");
+      // if already warned about lack of encryption, just return
+      if (this.previously_warned)
+          return;
+      e.preventDefault();
+      this.previously_warned = true;
+      return;
+    });
+
+}
+
 var checkButton = window.setInterval(addButtonHooks, 1000);
+var checkMessage = window.setInterval(decryptEmail, 1000);
 
