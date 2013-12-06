@@ -5,6 +5,8 @@
     "description": "Automates the process of sending encrypted emails in gmail",
     "version": "0.1",
 
+    "options_page": "options.html",
+
     "icons": {},
 
     "page_action": {
@@ -17,7 +19,10 @@
     "content_scripts": [
         {
             "matches": ["*://mail.google.com/*"],
-            "js": ["lib/jquery.js", "lib/openpgp.min.js", "gmail-injector.js"],
+            "js": ["lib/jquery.js",
+                    "lib/openpgp.min.js",
+                    "gmail-injector.js"
+                  ],
             "run_at": "document_end"
         }
     ],
@@ -28,6 +33,6 @@
     // pages we can make XHR requests to
     // http://developer.chrome.com/extensions/xhr.html
     "permissions": [
-        "http://www.google.com/"
+        "http://www.gamingeden.com/"
     ]
 }

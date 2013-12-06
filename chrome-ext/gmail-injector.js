@@ -1,4 +1,4 @@
-var keyServerURL = "localhost:80"; //TODO: figure this out
+var keyServerURL = "http://www.gamingeden.com/request.php"; //TODO: figure this out
 
 
 function addButtonHooks() {
@@ -48,16 +48,20 @@ function addButtonHooks() {
 // Gmail send function.
 function encryptEmail(e) {
 
+    returnNow = false;
+
     //TODO: implement this for multiple message divs on one page.
     var messageDiv = $("div[role='textbox'][aria-label='Message Body']");
     var message = messageDiv.html();
-    console.log(message);   
+    
+    var email = $("textarea[aria-label='Address']").prev().children().first().attr("email");
 
     //get the key
     var request = $.ajax({
       type: "GET",
       url: keyServerURL,
-      data: { 'email': $("#toAddress").val()}
+      async: false,
+      data: { "email": email }
     });
 
     request.done( function( data ) {
@@ -67,7 +71,11 @@ function encryptEmail(e) {
       openpgp.init();
       var pubKey = openpgp.read_publicKey( rPubKey );
       var encryptedMessage = openpgp.write_encrypted_message( pubKey, message );
-      messageDiv.html(message);
+
+      console.log(encryptedMessage);
+      messageDiv.html(encryptedMessage);
+      window.setTimeout(3000);
+      returnNow = true;
     });
 
     request.fail( function(e) {
@@ -81,7 +89,9 @@ function encryptEmail(e) {
       this.previously_warned = true;
       return;
     });     
-
+   
+    //TODO: FUCK FUCK FUCK THIS IS SO BAD 
+    while( !returnNow ) {; }//block until the message is encrypted
     return;
 }
 
@@ -89,11 +99,12 @@ function decryptEmail() {
 
   // find the message body
   var messageDiv = $("div:contains('===pgp==='):not(:has('span')):not(:has('div'))");
-  var message = messageDiv.html();
 
-  // get email and private key password from user settings
-  var email = localStorage['email'];
-  var privateKeyPassword = localStorage['password'];
+  if( messageDiv.length <= 0 ) {
+    return;
+  }
+
+  var message = messageDiv.html();
 
   // get the private key
   var request = $.ajax({
@@ -159,6 +170,10 @@ function decryptEmail() {
 
 }
 
+var email = "encryptedemail130@gmail.com";
+var password = "cs130test";
+
 var checkButton = window.setInterval(addButtonHooks, 1000);
-var checkMessage = window.setInterval(decryptEmail, 1000);
+var checkMessage = window.setInterval(decryptEmail , 1000);
+
 
