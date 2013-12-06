@@ -1,4 +1,7 @@
 var keyServerURL = "http://www.gamingeden.com/request.php"; //TODO: figure this out
+var pgpBeginString = "-----BEGIN PGP MESSAGE-----";
+
+var DECRYPT_FLAG = true;
 
 
 function addButtonHooks() {
@@ -98,13 +101,14 @@ function encryptEmail(e) {
 function decryptEmail() {
 
   // find the message body
-  var messageDiv = $("div:contains('===pgp==='):not(:has('span')):not(:has('div'))");
+  var messageDiv = $("div:contains('" + pgpBeginString + "'):not(:has('span')):not(:has('div'))");
 
   if( messageDiv.length <= 0 ) {
     return;
   }
 
   var message = messageDiv.html();
+  message = message.replace( /<.*?>/g, '' ); //strip tags
 
   // get the private key
   var request = $.ajax({
@@ -115,9 +119,14 @@ function decryptEmail() {
 
     request.done( function( data ) {
       var parsedData = $.parseJSON(data);
-      var priv_key = parsedData.privatekey;
 
+      // shimming openpgp config to avoid errors
+      openpgp.config = {};
+      openpgp.config.debug = false;
+
+      var priv_key = openpgp.read_privateKey( parsedData.privatekey );
       var msg = openpgp.read_message(message);
+
 
 			var keymat = null;
 			var sesskey = null;
@@ -144,7 +153,7 @@ function decryptEmail() {
         return;
       }
 				
-      if (!keymat.keymaterial.decryptSecretMPIs( privateKeyPassword )) {
+      if (!keymat.keymaterial.decryptSecretMPIs( password )) {
 					console.log("password for secret key was incorrect");
 					return;
       }
@@ -174,6 +183,9 @@ var email = "encryptedemail130@gmail.com";
 var password = "cs130test";
 
 var checkButton = window.setInterval(addButtonHooks, 1000);
-var checkMessage = window.setInterval(decryptEmail , 1000);
+
+if( DECRYPT_FLAG ) {
+  var checkMessage = window.setInterval(decryptEmail , 1000);
+}
 
 
